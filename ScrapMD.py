@@ -49,7 +49,14 @@ def getxlsx(name):
 	return workbook, sheet1
 
 def header(sheet):
-	write = ["HTTP", "NAZIV DEL. MESTA", "OPIS", "Datum", "Podjetje", "Kraj"]
+	write = [
+			"HTTP",
+			"NAZIV DEL. MESTA",
+			"OPIS",
+			"Datum",
+			"Podjetje",
+			"Kraj"
+			]
 	for numb, word in enumerate(write):
 		sheet.write(0,numb, word)	
 
@@ -66,7 +73,12 @@ def getlastpage():  # find last page from searching first page, might be improve
 	!!!MIGHT BE IMPROVED?!!!'''
 def writedata(write_here, link, x):
 	write_here.write(x, 0, "https://www.mojedelo.com" + link['href'])
-	search = [[1 ,"h2", {"class" : "title"}],[2, "p", {}],[3, "div", {"class" : "detail"}]]	
+	search = [
+			[1 ,"h2", {"class" : "title"}],
+			[2, "p", {}],
+			[3, "div", {"class" : "detail"}]
+			]	
+
 	for y, data, claz in search:
 		for result in link.find_all(data, claz):
 			write_here.write(x, y, result.text)
@@ -85,8 +97,12 @@ def išči_mojedelo():
 
 		if response is not None:
 			soup = BeautifulSoup(response.text, 'html.parser')
-			search2 = [["a", {"class" : "w-inline-block job-ad deluxe w-clearfix"}], ["a", {"class" : "details overlayOnHover1"}]]
-			#["div", {"class" : "w-inline-block job-ad top w-clearfix"}] <-- details overlayOnHover1 is under this 
+			search2 = [
+						["a", {"class" : "w-inline-block job-ad deluxe w-clearfix"}],
+						#["div", {"class" : "w-inline-block job-ad top w-clearfix"}] <-- details overlayOnHover1 is under this 
+						["a", {"class" : "details overlayOnHover1"}]
+					  ]
+
 			for i, b in search2:
 				for link in soup.find_all(i, b, href=True):
 					writedata(sheet1, link, x)
