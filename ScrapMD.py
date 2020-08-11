@@ -90,7 +90,7 @@ def išči_mojedelo():
 			for i, b in search2:
 				for link in soup.find_all(i, b, href=True):
 					writedata(sheet1, link, x)
-					x += 1                 # <--- might be fine to increment x elsewhere
+					x += 1                 # <--- maybe increment x elsewhere
 	wb.close()
 	end = time.time()
 	print(f"Total time: {(end - start)/60} minutes")
