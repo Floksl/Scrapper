@@ -53,7 +53,7 @@ def header(sheet):
 	for numb, word in enumerate(write):
 		sheet.write(0,numb, word)	
 
-def getlastpage():
+def getlastpage():  # find last page from searching first page, might be improved to only search 1st page once not twice
 	response = get_html(url)
 	if response is not None:
 		soup = BeautifulSoup(response.text, "html.parser")
@@ -65,6 +65,7 @@ def getlastpage():
 	looking at "p" you can get class or no class
 	!!!MIGHT BE IMPROVED?!!!'''
 def writedata(write_here, link, x):
+	write_here.write(x, 0, "https://www.mojedelo.com" + link['href'])
 	search = [[1 ,"h2", {"class" : "title"}],[2, "p", {}],[3, "div", {"class" : "detail"}]]	
 	for y, data, claz in search:
 		for result in link.find_all(data, claz):
@@ -84,22 +85,17 @@ def išči_mojedelo():
 
 		if response is not None:
 			soup = BeautifulSoup(response.text, 'html.parser')
-			for link in soup.find_all('a', class_="w-inline-block job-ad deluxe w-clearfix", href=True):
-				sheet1.write(x, 0, "https://www.mojedelo.com"+ link['href'])
-				writedata(sheet1, link, x)
-				x+= 1
-			
-			for link in soup.find_all('div', class_="w-inline-block job-ad top w-clearfix"):
-				for href in link.find_all('a',class_="details overlayOnHover1", href=True):
-					sheet1.write(x, 0, "https://www.mojedelo.com"+ href['href'])
+			search2 = [["a", {"class" : "w-inline-block job-ad deluxe w-clearfix"}], ["a", {"class" : "details overlayOnHover1"}]]
+			#["div", {"class" : "w-inline-block job-ad top w-clearfix"}] <-- details overlayOnHover1 is under this 
+			for i, b in search2:
+				for link in soup.find_all(i, b, href=True):
 					writedata(sheet1, link, x)
-				x+= 1
-
+					x += 1                 # <--- might be fine to increment x elsewhere
 	wb.close()
 	end = time.time()
 	print(f"Total time: {(end - start)/60} minutes")
 
-url = "https://www.mojedelo.com/prosta-delovna-mesta/vsa-podrocja/osrednjeslovenska?p="
 
+url = "https://www.mojedelo.com/prosta-delovna-mesta/vsa-podrocja/osrednjeslovenska?p="
 
 išči_mojedelo()
