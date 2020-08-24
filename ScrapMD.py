@@ -8,30 +8,31 @@ from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-# webside friendly retry 
+
 def requests_retry_session(
     retries=3,
     backoff_factor=0.3,
     status_forcelist=(500, 502, 504),
     session=None,
-    ):
-        session = session or requests.Session()
-        retry = Retry(
-            total=retries,
-            read=retries,
-            connect=retries,
-            backoff_factor=backoff_factor,
-            status_forcelist=status_forcelist,
-        )
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
-        return session
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
 
 def get_html(get_url):
     t0 = time.time()
     try:
-        response = requests_retry_session().get(get_url , timeout = 5)
+        response = requests_retry_session().get(get_url, timeout=5)
     except Exception as x:
         print('It failed :(', x.__class__.__name__)
     else:
@@ -44,40 +45,46 @@ def get_html(get_url):
 
 def getxlsx(name):
     datum = date.today()
-    workbook = xlsxwriter.Workbook(name + datum.strftime("-%d-%m") + '.xlsx') 
+    workbook = xlsxwriter.Workbook(name + datum.strftime("-%d-%m") + '.xlsx')
     sheet1 = workbook.add_worksheet()
     return workbook, sheet1
 
+
 def header(sheet):
     write = [
-            "HTTP",
-            "NAZIV DEL. MESTA",
-            "OPIS",
-            "Datum",
-            "Podjetje",
-            "Kraj"
-            ]
+        "HTTP",
+        "NAZIV DEL. MESTA",
+        "OPIS",
+        "Datum",
+        "Podjetje",
+        "Kraj"
+    ]
     for numb, word in enumerate(write):
-        sheet.write(0,numb, word)   
+        sheet.write(0, numb, word)
 
-def getlastpage():  # find last page from searching first page, might be improved to only search 1st page once not twice
+
+def getlastpage():  # find last page from searching first page
+    # !TODO might be improved to only search 1st page once not twice
     response = get_html(url)
     if response is not None:
         soup = BeautifulSoup(response.text, "html.parser")
         number = soup.find("li", class_="PagedList-skipToLast")
         return int(number.text)
 
+
 ''' search is [y position, and split '<h2 class="title">'],
     "detail" has many data that we increment
     looking at "p" you can get class or no class
     !!!MIGHT BE IMPROVED?!!!'''
+
+
 def writedata(write_here, link, x):
     write_here.write(x, 0, "https://www.mojedelo.com" + link['href'])
     search = [
-            [1 ,"h2", {"class" : "title"}],
-            [2, "p", {}],
-            [3, "div", {"class" : "detail"}]
-            ]   
+        [1, "h2", {"class": "title"}],
+        [2, "p", {}],
+        [3, "div", {"class": "detail"}]
+    ]
 
     for y, data, claz in search:
         for result in link.find_all(data, claz):
@@ -98,10 +105,10 @@ def išči_mojedelo():
         if response is not None:
             soup = BeautifulSoup(response.text, 'html.parser')
             search2 = [
-                        ["a", {"class" : "w-inline-block job-ad deluxe w-clearfix"}],
-                        #["div", {"class" : "w-inline-block job-ad top w-clearfix"}] <-- details overlayOnHover1 is under this 
-                        ["a", {"class" : "details overlayOnHover1"}]
-                      ]
+                    ["a", {"class": "w-inline-block job-ad deluxe w-clearfix"}],
+                    #["div", {"class": "w-inline-block job-ad top w-clearfix"}]
+                    ["a", {"class": "details overlayOnHover1"}]
+            ]
 
             for i, b in search2:
                 for link in soup.find_all(i, b, href=True):
